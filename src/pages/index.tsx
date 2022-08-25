@@ -8,9 +8,9 @@ const SplashPage: NextPage = () => {
   const router = useRouter()
 
   useEffect(() => {
-    setInterval(() => {
-      router.push('/login')
-    }, 10000)
+    router.push('/login')
+    /* setInterval(() => {
+    }, 10000) */
   }, [])
   return (
     <Splash />

@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import {
     MdArrowBack,
@@ -8,6 +8,9 @@ import {
     MdOutlineWork,
     MdOutlineFormatAlignLeft
 } from 'react-icons/md'
+
+import {BiLoader} from 'react-icons/bi'
+
 import {
     Container,
     Content,
@@ -24,6 +27,10 @@ import {
     ButtonClose
 } from './styles'
 
+import extension from './segmentos'
+import axios from 'axios'
+import Api from '../../../../hooks/api'
+
 const CreateNewCompany: React.FC = () => {
     const router = useRouter()
 
@@ -31,15 +38,49 @@ const CreateNewCompany: React.FC = () => {
         router.push('/app/clients')
     }
 
+    const [segmentos, setSegmentos] = useState([])
+
+    /* Valores dos formulários */
+    const [loadCep, setLoadCep] = useState('none')
+    const [estado, setEstado] = useState('')
+    const [cidade, setCidade] = useState('')
+    const [bairro, setBairro] = useState('')
+    const [endereco, setEndereco] = useState('')
+    const [complemento, setComplemento] = useState('')
+
+    useEffect(() => {
+        Api.get('/api/extension/segment/')
+            .then(res => {
+                console.log(res)
+                setSegmentos(res.data.res)
+            })
+            .catch(erro => console.log(process.env.API))
+    }, [])
+
+    async function addressApi(event) {
+        const cep = event.target.value
+        if (cep.length === 8) {
+            setLoadCep('block')
+            axios.get(`https://ws.apicep.com/cep/${cep}.json`)
+                .then(res => {
+                    console.log(res.data)
+                    setCidade(res.data.city)
+                    setEndereco(res.data.address)
+                    setLoadCep('none')
+                })
+                .catch(erro => console.log(erro))
+        }
+    }
+    
     return (
         <Container>
             <HeaderContainer>
                 <HeaderWrapper>
-                    <MdArrowBack 
+                    <MdArrowBack
                         onClick={redirectListClients}
-                        size={24} 
-                        color='#4D4D4D' 
-                        style={{cursor: 'pointer'}} 
+                        size={24}
+                        color='#4D4D4D'
+                        style={{ cursor: 'pointer' }}
                     />
                     <HeaderTitle>NOVA EMPRESA</HeaderTitle>
                 </HeaderWrapper>
@@ -53,24 +94,24 @@ const CreateNewCompany: React.FC = () => {
                         <label>CNPJ/CPF</label>
                         <InputContainer>
                             <MdPerson
-                                size={32} 
-                                style={{marginLeft: '-3rem', marginRight: '1rem'}} 
+                                size={32}
+                                style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                            <input placeholder="Adicionar título"/>
+                            <input placeholder="Adicionar título" />
                         </InputContainer>
                     </InputLabel>
 
-                     {/* Nome Empresa */}
-                     <InputLabel>
+                    {/* Nome Empresa */}
+                    <InputLabel>
                         <label>Nome da Empresa</label>
                         <InputContainer>
                             <MdOutlineDomain
-                                size={32} 
-                                style={{marginLeft: '-3rem', marginRight: '1rem'}} 
+                                size={32}
+                                style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                            <input placeholder="Adicionar título"/>
+                            <input placeholder="Adicionar título" />
                         </InputContainer>
                     </InputLabel>
 
@@ -78,13 +119,17 @@ const CreateNewCompany: React.FC = () => {
                     <InputLabel>
                         <label>Seguimento da Empresa</label>
                         <InputContainer>
-                            <MdOutlineWork 
-                                size={32} 
-                                style={{marginLeft: '-3rem', marginRight: '1rem'}} 
+                            <MdOutlineWork
+                                size={32}
+                                style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
                             <select>
-                                <option value=''>Selecione o seguimento em que a empresa atua</option>
+                                {segmentos.map((seg, key) => {
+                                    return (
+                                        <option value={seg.cod} key={seg.cod}>{seg.descricao}</option>
+                                    )
+                                })}
                             </select>
                         </InputContainer>
                     </InputLabel>
@@ -93,51 +138,96 @@ const CreateNewCompany: React.FC = () => {
                     <InputLabel>
                         <label>Endereço da Empresa</label>
                         <InputContainer>
-                        <MdOutlineMap 
+                            <MdOutlineMap
                                 size={32}
-                                style={{ 
-                                    minWidth: '32px', 
-                                    marginLeft: '-3rem', 
+                                style={{
+                                    minWidth: '32px',
+                                    marginLeft: '-3rem',
                                     marginRight: '1rem'
                                 }}
                                 color='#A7A7A7'
                             />
-                            <input 
+
+                            {/* CEP */}
+                            {/* Vai carregar os dados do endereço via API */}
+                            <input
                                 type="text"
                                 placeholder="Informe o CEP"
+                                maxLength="8"
+                                onChange={addressApi}
                             />
+
+                            <BiLoader
+                                size={15}
+                                style={{
+                                    display: loadCep,
+                                    minWidth: '32px',
+                                    marginLeft: '-3rem',
+                                    marginRight: '1rem'
+                                }}
+                                color='#A7A7A7'
+                            />
+
                             <Spacing />
+
+                            {/* Estado */}
                             <select>
-                                <option value=''>Estado</option>
+                                {/*  {brazilStates.map(states => <option key={states}>{`${states}`}</option>)} */}
+                                <option value='ES'>Estado</option>
                             </select>
                             <Spacing />
-                            <select>
-                                <option value=''>Cidade</option>
-                            </select>
+                            {/* cidade */}
+                            <input
+                                type="text"
+                                placeholder="Cidade"
+                                value={cidade}
+                                onChange={(e) => setCidade(e.target.value)}
+                            />
                         </InputContainer>
                         <SpacingBottom />
                         <InputContainer>
-                            <input 
+                        {/* Endereço */}
+                            <input
                                 type="text"
-                                placeholder="Informe a rua com o número"
+                                placeholder="Endereço"
+                                value={endereco}
+                                onChange={(e) => setEndereco(e.target.value)}
+                            />
+                            <Spacing />
+                            <input
+                                type="text"
+                                placeholder="Número"
                             />
                         </InputContainer>
+
+                        <SpacingBottom />
+
+                        <InputContainer>
+                        {/* Complemento */}
+                            <input
+                                type="text"
+                                placeholder="Complemento"
+                                maxLength="100"
+                            />
+                            
+                        </InputContainer>
+
                     </InputLabel>
 
                     {/* Description */}
                     <InputLabel>
                         <label>Nota sobre o cliente</label>
                         <InputContainer>
-                            <MdOutlineFormatAlignLeft 
-                                size={32} 
-                                style={{marginLeft: '-3rem', marginRight: '1rem'}} 
+                            <MdOutlineFormatAlignLeft
+                                size={32}
+                                style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                           <textarea
+                            <textarea
                                 placeholder='Adicionar nota ou observação sobre seu cliente'
-                           >
+                            >
 
-                           </textarea>
+                            </textarea>
                         </InputContainer>
                     </InputLabel>
 
