@@ -9,7 +9,7 @@ import {
     MdOutlineFormatAlignLeft
 } from 'react-icons/md'
 
-import {BiLoader} from 'react-icons/bi'
+import { BiLoader } from 'react-icons/bi'
 
 import {
     Container,
@@ -24,7 +24,8 @@ import {
     SpacingBottom,
     ButtonsContainer,
     ButtonSave,
-    ButtonClose
+    ButtonClose,
+    LabelAlert
 } from './styles'
 
 import extension from './segmentos'
@@ -38,40 +39,64 @@ const CreateNewCompany: React.FC = () => {
         router.push('/app/clients')
     }
 
-    const [segmentos, setSegmentos] = useState([])
 
     /* Valores dos formulários */
-    const [loadCep, setLoadCep] = useState('none')
-    const [estado, setEstado] = useState('')
+    const [codSegmento, setCodSegmento] = useState()
+    const [uf, setUf] = useState('')
     const [cidade, setCidade] = useState('')
     const [bairro, setBairro] = useState('')
     const [endereco, setEndereco] = useState('')
     const [complemento, setComplemento] = useState('')
 
+    /* segmentos */
+    const [segmentos, setSegmentos] = useState([])
     useEffect(() => {
         Api.get('/api/extension/segment/')
             .then(res => {
-                console.log(res)
                 setSegmentos(res.data.res)
             })
             .catch(erro => console.log(process.env.API))
     }, [])
 
+    /* estados */
+    const [estado, setEstado] = useState([])
+    useEffect(() => {
+        Api.get('/api/extension/apiCep/state')
+            .then(res => {
+                setEstado(res.data.res)
+            })
+            .catch(erro => console.log(erro))
+    }, [])
+
+    /* API CEP */
+    const [loadCep, setLoadCep] = useState('none')
     async function addressApi(event) {
         const cep = event.target.value
         if (cep.length === 8) {
             setLoadCep('block')
             axios.get(`https://ws.apicep.com/cep/${cep}.json`)
                 .then(res => {
-                    console.log(res.data)
                     setCidade(res.data.city)
                     setEndereco(res.data.address)
+                    setBairro(res.data.district)
+                    setUf(res.data.state)
                     setLoadCep('none')
                 })
-                .catch(erro => console.log(erro))
+                .catch(erro => {
+                    console.log(erro.message)
+                })
         }
     }
-    
+
+
+
+    const body = {
+
+
+
+    }
+
+
     return (
         <Container>
             <HeaderContainer>
@@ -111,7 +136,7 @@ const CreateNewCompany: React.FC = () => {
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                            <input placeholder="Adicionar título" />
+                            <input placeholder="CNPJ/CPF"/>
                         </InputContainer>
                     </InputLabel>
 
@@ -171,9 +196,15 @@ const CreateNewCompany: React.FC = () => {
                             <Spacing />
 
                             {/* Estado */}
-                            <select>
-                                {/*  {brazilStates.map(states => <option key={states}>{`${states}`}</option>)} */}
-                                <option value='ES'>Estado</option>
+                            <select value={uf} onChange={(e) => setUf(e.target.value)}>
+                                <option value="">Estado</option>
+                                {
+                                    estado.map((s, key) => {
+                                        return (
+                                            <option value={s.uf} key={s.cod}>{s.estado}</option>
+                                        )
+                                    })
+                                }
                             </select>
                             <Spacing />
                             {/* cidade */}
@@ -186,7 +217,7 @@ const CreateNewCompany: React.FC = () => {
                         </InputContainer>
                         <SpacingBottom />
                         <InputContainer>
-                        {/* Endereço */}
+                            {/* Endereço */}
                             <input
                                 type="text"
                                 placeholder="Endereço"
@@ -194,6 +225,17 @@ const CreateNewCompany: React.FC = () => {
                                 onChange={(e) => setEndereco(e.target.value)}
                             />
                             <Spacing />
+
+                            <input
+                                type="text"
+                                placeholder='Bairro'
+                                value={bairro}
+                                onChange={(e) => setBairro(e.target.value)}
+                            />
+
+
+                            <Spacing />
+
                             <input
                                 type="text"
                                 placeholder="Número"
@@ -203,13 +245,13 @@ const CreateNewCompany: React.FC = () => {
                         <SpacingBottom />
 
                         <InputContainer>
-                        {/* Complemento */}
+                            {/* Complemento */}
                             <input
                                 type="text"
                                 placeholder="Complemento"
                                 maxLength="100"
                             />
-                            
+
                         </InputContainer>
 
                     </InputLabel>

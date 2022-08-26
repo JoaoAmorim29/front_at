@@ -192,3 +192,7 @@ export const ButtonClose = styled.button`
 
     color: #979797;
 `
+export const LabelAlert = styled.label`
+    color: #FF0000,
+    font-size: 2rem
+`
