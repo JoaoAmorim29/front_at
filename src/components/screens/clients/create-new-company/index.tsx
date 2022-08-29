@@ -31,6 +31,10 @@ import {
 import extension from './segmentos'
 import axios from 'axios'
 import Api from '../../../../hooks/api'
+import CodInput from './codInput'
+import { cnpj, cpf } from 'cpf-cnpj-validator'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const CreateNewCompany: React.FC = () => {
     const router = useRouter()
@@ -39,7 +43,6 @@ const CreateNewCompany: React.FC = () => {
         router.push('/app/clients')
     }
 
-
     /* Valores dos formulários */
     const [codSegmento, setCodSegmento] = useState()
     const [uf, setUf] = useState('')
@@ -47,6 +50,18 @@ const CreateNewCompany: React.FC = () => {
     const [bairro, setBairro] = useState('')
     const [endereco, setEndereco] = useState('')
     const [complemento, setComplemento] = useState('')
+    const [cod, setCod] = useState(0)
+
+    /* Validar CNPJ */
+    const validCod = (e) => {
+        setCod(e.target.value)
+        console.log(cod)
+        if (cod.length == 10) {
+            const valid = cpf.isValid(cod)
+            console.log(valid)
+            if (!valid) toast('Cpf invalido')
+        }
+    }
 
     /* segmentos */
     const [segmentos, setSegmentos] = useState([])
@@ -83,19 +98,20 @@ const CreateNewCompany: React.FC = () => {
                     setLoadCep('none')
                 })
                 .catch(erro => {
-                    console.log(erro.message)
+                    console.log(erro)
                 })
         }
     }
 
 
-
-    const body = {
-
-
-
-    }
-
+    //https://servicodados.ibge.gov.br/api/v1/localidades/estados/{UF}/municipios
+    const [municipios, setMunicipios] = useState([])
+    useEffect(() => {
+        axios.get('https://servicodados.ibge.gov.br/api/v1/localidades/estados/PA/municipios')
+            .then(res => {
+                setMunicipios(res.data)
+            })
+    }, [])
 
     return (
         <Container>
@@ -115,6 +131,7 @@ const CreateNewCompany: React.FC = () => {
                 <Form
                 >
                     {/* Document */}
+
                     <InputLabel>
                         <label>CNPJ/CPF</label>
                         <InputContainer>
@@ -123,7 +140,20 @@ const CreateNewCompany: React.FC = () => {
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                            <input placeholder="Adicionar título" />
+                            {/* <CodInput 
+                                placeholder="CNPJ"
+                                value={cod}
+                                onChange={(e) => setCod(e.target.value)}
+                                ></CodInput> */}
+
+                            <input
+                                type="number"
+                                placeholder='CNPJ/CPF'
+                                //value={cod}
+                                maxLength="11"
+                                onChange={validCod}
+                            />
+
                         </InputContainer>
                     </InputLabel>
 
@@ -136,7 +166,7 @@ const CreateNewCompany: React.FC = () => {
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                            <input placeholder="CNPJ/CPF"/>
+                            <input placeholder="Nome da Empresa" />
                         </InputContainer>
                     </InputLabel>
 
@@ -196,7 +226,7 @@ const CreateNewCompany: React.FC = () => {
                             <Spacing />
 
                             {/* Estado */}
-                            <select value={uf} onChange={(e) => setUf(e.target.value)}>
+                            <select value={uf} onChange={(e) => setUf(e.target.value)} on>
                                 <option value="">Estado</option>
                                 {
                                     estado.map((s, key) => {
@@ -283,6 +313,7 @@ const CreateNewCompany: React.FC = () => {
                     </ButtonsContainer>
                 </Form>
             </Content>
+            <ToastContainer></ToastContainer>
         </Container>
     )
 }
