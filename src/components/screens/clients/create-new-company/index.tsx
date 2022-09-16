@@ -39,29 +39,18 @@ import 'react-toastify/dist/ReactToastify.css'
 const CreateNewCompany: React.FC = () => {
     const router = useRouter()
 
-    const redirectListClients = () => {
-        router.push('/app/clients')
-    }
-
     /* Valores dos formulários */
-    const [codSegmento, setCodSegmento] = useState()
+    const [codSegmento, setCodSegmento] = useState(0)
     const [uf, setUf] = useState('')
     const [cidade, setCidade] = useState('')
     const [bairro, setBairro] = useState('')
     const [endereco, setEndereco] = useState('')
     const [complemento, setComplemento] = useState('')
-    const [cod, setCod] = useState(0)
-
-    /* Validar CNPJ */
-    const validCod = (e) => {
-        setCod(e.target.value)
-        console.log(cod)
-        if (cod.length == 10) {
-            const valid = cpf.isValid(cod)
-            console.log(valid)
-            if (!valid) toast('Cpf invalido')
-        }
-    }
+    const [numero, setNumero] = useState('')
+    const [rua, setRua] = useState('')
+    const [cod, setCod] = useState('')
+    const [name, setName] = useState('')
+    const [observacao, setObservacao] = useState('')
 
     /* segmentos */
     const [segmentos, setSegmentos] = useState([])
@@ -85,12 +74,14 @@ const CreateNewCompany: React.FC = () => {
 
     /* API CEP */
     const [loadCep, setLoadCep] = useState('none')
+    const [getCep, setCep] = useState('')
     async function addressApi(event) {
         const cep = event.target.value
         if (cep.length === 8) {
             setLoadCep('block')
             axios.get(`https://ws.apicep.com/cep/${cep}.json`)
                 .then(res => {
+                    setCep(cep)
                     setCidade(res.data.city)
                     setEndereco(res.data.address)
                     setBairro(res.data.district)
@@ -101,6 +92,39 @@ const CreateNewCompany: React.FC = () => {
                     console.log(erro)
                 })
         }
+    }
+
+
+    /* ENVIAR OS DADOS VIA POST */
+
+    const auth = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NjE4MjM1MTAsImV4cCI6MTY2MTg0MTUxMH0.vwgtThvc85PlyK2zg8NCcSmTQGMFvWdBK0n7krNe1Ck';
+
+
+    const body = {
+        cod: cod,
+        name: name,
+        segment: { cod: codSegmento, "desc": "" },
+        obs: observacao,
+        address: {
+            cep: getCep,
+            uf: uf,
+            city: cidade,
+            address: endereco,
+            district: bairro,
+            n: numero,
+            cmpl: complemento,
+            str: rua
+        }
+    }
+
+    const cadastrarCompany = (e) => {
+        e.preventDefault()
+        Api.post('/api/company/add', body)
+            .then(res => {
+                console.log(res)
+                router.push('/app/clients')
+            })
+            .catch(erro => console.log(erro))
     }
 
 
@@ -118,7 +142,7 @@ const CreateNewCompany: React.FC = () => {
             <HeaderContainer>
                 <HeaderWrapper>
                     <MdArrowBack
-                        onClick={redirectListClients}
+                        //onClick={redirectListClients}
                         size={24}
                         color='#4D4D4D'
                         style={{ cursor: 'pointer' }}
@@ -147,11 +171,11 @@ const CreateNewCompany: React.FC = () => {
                                 ></CodInput> */}
 
                             <input
-                                type="number"
+                                type="text"
                                 placeholder='CNPJ/CPF'
-                                //value={cod}
-                                maxLength="11"
-                                onChange={validCod}
+                                value={cod}
+                                max="14"
+                                onChange={(e) => setCod(e.target.value)}
                             />
 
                         </InputContainer>
@@ -166,7 +190,11 @@ const CreateNewCompany: React.FC = () => {
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                            <input placeholder="Nome da Empresa" />
+                            <input
+                                placeholder="Nome da Empresa"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                            />
                         </InputContainer>
                     </InputLabel>
 
@@ -179,7 +207,8 @@ const CreateNewCompany: React.FC = () => {
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                            <select>
+                            <select value={codSegmento} onChange={(e) => setCodSegmento(e.target.value)}>
+                                <option value="0">Segmentos</option>
                                 {segmentos.map((seg, key) => {
                                     return (
                                         <option value={seg.cod} key={seg.cod}>{seg.descricao}</option>
@@ -269,6 +298,9 @@ const CreateNewCompany: React.FC = () => {
                             <input
                                 type="text"
                                 placeholder="Número"
+                                value={numero}
+                                onChange={(e) => setNumero(e.target.value)}
+
                             />
                         </InputContainer>
 
@@ -280,7 +312,19 @@ const CreateNewCompany: React.FC = () => {
                                 type="text"
                                 placeholder="Complemento"
                                 maxLength="100"
+                                value={complemento}
+                                onChange={(e) => setComplemento(e.target.value)}
                             />
+                            <Spacing />
+                            {/* Rua */}
+                            <input
+                                type="text"
+                                placeholder="Rua"
+                                maxLength="100"
+                                value={rua}
+                                onChange={(e) => setRua(e.target.value)}
+                            />
+
 
                         </InputContainer>
 
@@ -297,6 +341,8 @@ const CreateNewCompany: React.FC = () => {
                             />
                             <textarea
                                 placeholder='Adicionar nota ou observação sobre seu cliente'
+                                value={observacao}
+                                onChange={(e) => setObservacao(e.target.value)}
                             >
 
                             </textarea>
@@ -304,9 +350,14 @@ const CreateNewCompany: React.FC = () => {
                     </InputLabel>
 
                     <ButtonsContainer>
-                        <ButtonSave>Salvar</ButtonSave>
+
+                        <ButtonSave onClick={cadastrarCompany}>Salvar</ButtonSave>
+
                         <ButtonClose
-                            onClick={redirectListClients}
+                        onClick={(e) => {
+                            e.preventDefault()
+                            router.push('/app/clients')
+                        }}
                         >
                             Sair
                         </ButtonClose>
