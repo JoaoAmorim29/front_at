@@ -32,15 +32,33 @@ const CreateNewClient: React.FC = () => {
         router.push('/app/clients')
     }
 
+    const cadastrarClient = (e) => {
+        e.preventDefault()
+        console.log('teste')
+    }
+
     const redirectNewCompany = () => {
         router.push('/app/clients/new-company')
     }
     
-
     const [codSegmento, setCodSegmento] = useState()
     const [segmentos, setSegmentos] = useState([])
     const [empresas, setEmpresas] = useState([])
     const [codEmpresa, setCodEmpresa] = useState('')
+    const [note, setNote] = useState('')
+    const [phone, setPhone] = useState('')
+    const [email, setEmail] = useState('')
+    const [nome, setNome] = useState('')
+
+    const body = {
+        name: nome,
+        codCompany: codEmpresa,
+        note: note,
+        contact: {
+            phone: phone,
+            email: email
+        }
+    }
 
     const selectEmpresa = (e) => {
         let cod = e.target.value
@@ -150,7 +168,11 @@ const CreateNewClient: React.FC = () => {
                                 style={{marginLeft: '-3rem', marginRight: '1rem'}} 
                                 color='#A7A7A7'
                             />
-                            <input placeholder="(XX) 9 XXXX-XXXX"/>
+                            <input 
+                                placeholder="(XX) 9 XXXX-XXXX"
+                                value={phone}
+                                onChange={(e)=>setPhone(e.target.value)}
+                            />
                         </InputContainer>
                     </InputLabel>
 
@@ -186,11 +208,13 @@ const CreateNewClient: React.FC = () => {
 
                     <ButtonsContainer>
 
-                        <ButtonSave>Salvar</ButtonSave>
+                        <ButtonSave
+                            onClick={cadastrarClient}
+                        >Salvar</ButtonSave>
 
 
                         <ButtonClose
-                            onClick={redirectListClients}
+                            
                         >
                             Sair
                         </ButtonClose>
