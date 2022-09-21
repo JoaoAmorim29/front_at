@@ -38,7 +38,6 @@ import 'react-toastify/dist/ReactToastify.css'
 
 const CreateNewCompany: React.FC = () => {
     const router = useRouter()
-
     /* Valores dos formulários */
     const [codSegmento, setCodSegmento] = useState(0)
     const [uf, setUf] = useState('')
@@ -59,7 +58,7 @@ const CreateNewCompany: React.FC = () => {
             .then(res => {
                 setSegmentos(res.data.res)
             })
-            .catch(erro => console.log(process.env.API))
+            .catch(erro => console.log(erro))
     }, [])
 
     /* estados */
