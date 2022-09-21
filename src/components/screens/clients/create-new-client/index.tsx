@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import { useRouter } from 'next/router'
 import {
     MdArrowBack,
@@ -23,6 +23,7 @@ import {
     ButtonSave,
     ButtonClose
 } from './styles'
+import Api from '../../../../hooks/api'
 
 const CreateNewClient: React.FC = () => {
     const router = useRouter()
@@ -30,6 +31,44 @@ const CreateNewClient: React.FC = () => {
     const redirectListClients = () => {
         router.push('/app/clients')
     }
+
+    const redirectNewCompany = () => {
+        router.push('/app/clients/new-company')
+    }
+    
+
+    const [codSegmento, setCodSegmento] = useState()
+    const [segmentos, setSegmentos] = useState([])
+    const [empresas, setEmpresas] = useState([])
+    const [codEmpresa, setCodEmpresa] = useState('')
+
+    const selectEmpresa = (e) => {
+        let cod = e.target.value
+        setCodEmpresa(cod)
+        empresas.map(empresa => {
+            if(empresa.codigo === cod) {
+                setCodSegmento(empresa.cod_segmento)
+            }
+        })
+    }
+
+    useEffect(() => {
+        Api.get('/api/extension/segment/')
+            .then(res => {
+                setSegmentos(res.data.res)
+            })
+            .catch(erro => console.log(erro))
+    }, [])
+
+    useEffect(() => {
+        Api.get('/api/company/')
+            .then(res => {
+                //console.log(res.data.res)
+                setEmpresas(res.data.res)
+            })
+            .catch(erro => console.log(erro))
+    }, [])
+
 
     return (
         <Container>
@@ -70,11 +109,16 @@ const CreateNewClient: React.FC = () => {
                                 style={{marginLeft: '-3rem', marginRight: '1rem'}} 
                                 color='#A7A7A7'
                             />
-                            <select>
-                                <option value=''>Nenhuma empresa selecionado</option>
+                            <select value={codEmpresa} onChange={selectEmpresa}>
+                                <option value="0">Selecione a empresa</option>
+                                {empresas.map((empresa, key) => {
+                                    return (
+                                        <option value={empresa.codigo} key={empresa.codigo}>{empresa.razao_social}</option>
+                                    )
+                                })}
                             </select>
                         </InputContainer>
-                        <a>Adicionar nova empresa</a>
+                        <a onClick={redirectNewCompany}>Adicionar nova empresa</a>
                     </InputLabel>
 
                     {/* Seguimento */}
@@ -86,8 +130,13 @@ const CreateNewClient: React.FC = () => {
                                 style={{marginLeft: '-3rem', marginRight: '1rem'}} 
                                 color='#A7A7A7'
                             />
-                            <select>
-                                <option value=''>Selecione o seguimento em que a empresa atua</option>
+                            <select disabled value={codSegmento} onChange={(e) => setCodSegmento(e.target.value)}>
+                                <option value="0">Segmentos</option>
+                                {segmentos.map((seg, key) => {
+                                    return (
+                                        <option value={seg.cod} key={seg.cod}>{seg.descricao}</option>
+                                    )
+                                })}
                             </select>
                         </InputContainer>
                     </InputLabel>
@@ -136,7 +185,10 @@ const CreateNewClient: React.FC = () => {
                     </InputLabel>
 
                     <ButtonsContainer>
+
                         <ButtonSave>Salvar</ButtonSave>
+
+
                         <ButtonClose
                             onClick={redirectListClients}
                         >

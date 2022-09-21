@@ -255,7 +255,7 @@ const CreateNewCompany: React.FC = () => {
                             <Spacing />
 
                             {/* Estado */}
-                            <select value={uf} onChange={(e) => setUf(e.target.value)} on>
+                            <select value={uf} onChange={(e) => setUf(e.target.value)}>
                                 <option value="">Estado</option>
                                 {
                                     estado.map((s, key) => {
