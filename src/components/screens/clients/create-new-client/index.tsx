@@ -24,17 +24,13 @@ import {
     ButtonClose
 } from './styles'
 import Api from '../../../../hooks/api'
+import api from '../../../../hooks/api'
 
 const CreateNewClient: React.FC = () => {
     const router = useRouter()
 
     const redirectListClients = () => {
         router.push('/app/clients')
-    }
-
-    const cadastrarClient = (e) => {
-        e.preventDefault()
-        console.log('teste')
     }
 
     const redirectNewCompany = () => {
@@ -58,6 +54,14 @@ const CreateNewClient: React.FC = () => {
             phone: phone,
             email: email
         }
+    }
+
+    const cadastrarClient = (e) => {
+        e.preventDefault()
+        console.log(body)
+        api.post('/api/client/add', body)
+            .then(res => console.log(res))
+            .catch(erro => console.log(erro))
     }
 
     const selectEmpresa = (e) => {
@@ -114,7 +118,11 @@ const CreateNewClient: React.FC = () => {
                                 style={{marginLeft: '-3rem', marginRight: '1rem'}} 
                                 color='#A7A7A7'
                             />
-                            <input placeholder="Adicionar título"/>
+                            <input 
+                                placeholder="Adicionar título"
+                                value={nome}
+                                onChange={(e)=> setNome(e.target.value)}    
+                            />
                         </InputContainer>
                     </InputLabel>
 
@@ -185,7 +193,11 @@ const CreateNewClient: React.FC = () => {
                                 style={{marginLeft: '-3rem', marginRight: '1rem'}} 
                                 color='#A7A7A7'
                             />
-                            <input placeholder="email@email.com"/>
+                            <input 
+                                placeholder="email@email.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
                         </InputContainer>
                     </InputLabel>
 
@@ -200,6 +212,8 @@ const CreateNewClient: React.FC = () => {
                             />
                            <textarea
                                 placeholder='Adicionar nota ou observação sobre seu cliente'
+                                value={note}
+                                onChange={(e) => setNote(e.target.value)}
                            >
 
                            </textarea>
