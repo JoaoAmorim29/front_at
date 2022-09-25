@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import {
     MdArrowBack,
@@ -6,7 +6,8 @@ import {
     MdOutlineCall,
     MdEmail,
     MdPerson,
-    MdOutlineFormatAlignLeft
+    MdOutlineFormatAlignLeft,
+    MdDone
 } from 'react-icons/md'
 import {
     Container,
@@ -25,6 +26,9 @@ import {
 } from './styles'
 import Api from '../../../../hooks/api'
 import api from '../../../../hooks/api'
+import { Bounce, toast, Zoom } from 'react-toastify';
+
+
 
 const CreateNewClient: React.FC = () => {
     const router = useRouter()
@@ -36,7 +40,7 @@ const CreateNewClient: React.FC = () => {
     const redirectNewCompany = () => {
         router.push('/app/clients/new-company')
     }
-    
+
     const [codSegmento, setCodSegmento] = useState()
     const [segmentos, setSegmentos] = useState([])
     const [empresas, setEmpresas] = useState([])
@@ -56,19 +60,43 @@ const CreateNewClient: React.FC = () => {
         }
     }
 
-    const cadastrarClient = (e) => {
+    /* const cadastrarClient = (e) => {
         e.preventDefault()
         console.log(body)
         api.post('/api/client/add', body)
             .then(res => console.log(res))
             .catch(erro => console.log(erro))
+    } */
+
+    const sucessoId = 'sucesso'
+    const erroId = 'erro'
+
+
+    const cadastrarClient = async (e: any) => {
+        e.preventDefault()
+        toast.promise(
+            api.post('/api/client/add', body), {
+            pending: 'Processando',
+            success: {
+                render({ data }) {
+                    return (data?.data.res.msg)
+                }
+            },
+            error: {
+                render({ data }){
+                    console.log(data)
+                    return (data.response.data.erro)
+                }
+            }
+        }
+        )
     }
 
     const selectEmpresa = (e) => {
         let cod = e.target.value
         setCodEmpresa(cod)
         empresas.map(empresa => {
-            if(empresa.codigo === cod) {
+            if (empresa.codigo === cod) {
                 setCodSegmento(empresa.cod_segmento)
             }
         })
@@ -96,11 +124,11 @@ const CreateNewClient: React.FC = () => {
         <Container>
             <HeaderContainer>
                 <HeaderWrapper>
-                    <MdArrowBack 
+                    <MdArrowBack
                         onClick={redirectListClients}
-                        size={24} 
-                        color='#4D4D4D' 
-                        style={{cursor: 'pointer'}} 
+                        size={24}
+                        color='#4D4D4D'
+                        style={{ cursor: 'pointer' }}
                     />
                     <HeaderTitle>NOVO CLIENTE</HeaderTitle>
                 </HeaderWrapper>
@@ -114,14 +142,14 @@ const CreateNewClient: React.FC = () => {
                         <label>Nome do Cliente</label>
                         <InputContainer>
                             <MdPerson
-                                size={32} 
-                                style={{marginLeft: '-3rem', marginRight: '1rem'}} 
+                                size={32}
+                                style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                            <input 
+                            <input
                                 placeholder="Adicionar título"
                                 value={nome}
-                                onChange={(e)=> setNome(e.target.value)}    
+                                onChange={(e) => setNome(e.target.value)}
                             />
                         </InputContainer>
                     </InputLabel>
@@ -130,9 +158,9 @@ const CreateNewClient: React.FC = () => {
                     <InputLabel>
                         <label>Nome da Empresa</label>
                         <InputContainer>
-                            <MdOutlineDomain 
-                                size={32} 
-                                style={{marginLeft: '-3rem', marginRight: '1rem'}} 
+                            <MdOutlineDomain
+                                size={32}
+                                style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
                             <select value={codEmpresa} onChange={selectEmpresa}>
@@ -151,9 +179,9 @@ const CreateNewClient: React.FC = () => {
                     <InputLabel>
                         <label>Seguimento da Empresa</label>
                         <InputContainer>
-                            <MdOutlineDomain 
-                                size={32} 
-                                style={{marginLeft: '-3rem', marginRight: '1rem'}} 
+                            <MdOutlineDomain
+                                size={32}
+                                style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
                             <select disabled value={codSegmento} onChange={(e) => setCodSegmento(e.target.value)}>
@@ -172,14 +200,14 @@ const CreateNewClient: React.FC = () => {
                         <label>Telefone do cliente</label>
                         <InputContainer>
                             <MdOutlineCall
-                                size={32} 
-                                style={{marginLeft: '-3rem', marginRight: '1rem'}} 
+                                size={32}
+                                style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                            <input 
+                            <input
                                 placeholder="(XX) 9 XXXX-XXXX"
                                 value={phone}
-                                onChange={(e)=>setPhone(e.target.value)}
+                                onChange={(e) => setPhone(e.target.value)}
                             />
                         </InputContainer>
                     </InputLabel>
@@ -189,11 +217,11 @@ const CreateNewClient: React.FC = () => {
                         <label>E-mail do cliente</label>
                         <InputContainer>
                             <MdEmail
-                                size={32} 
-                                style={{marginLeft: '-3rem', marginRight: '1rem'}} 
+                                size={32}
+                                style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                            <input 
+                            <input
                                 placeholder="email@email.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -205,18 +233,18 @@ const CreateNewClient: React.FC = () => {
                     <InputLabel>
                         <label>Nota sobre o cliente</label>
                         <InputContainer>
-                            <MdOutlineFormatAlignLeft 
-                                size={32} 
-                                style={{marginLeft: '-3rem', marginRight: '1rem'}} 
+                            <MdOutlineFormatAlignLeft
+                                size={32}
+                                style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                           <textarea
+                            <textarea
                                 placeholder='Adicionar nota ou observação sobre seu cliente'
                                 value={note}
                                 onChange={(e) => setNote(e.target.value)}
-                           >
+                            >
 
-                           </textarea>
+                            </textarea>
                         </InputContainer>
                     </InputLabel>
 
@@ -228,7 +256,6 @@ const CreateNewClient: React.FC = () => {
 
 
                         <ButtonClose
-                            
                         >
                             Sair
                         </ButtonClose>
