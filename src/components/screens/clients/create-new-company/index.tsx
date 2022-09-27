@@ -29,15 +29,18 @@ import {
 } from './styles'
 
 import extension from './segmentos'
-import axios from 'axios'
 import Api from '../../../../hooks/api'
+import axios from 'axios'
 import CodInput from './codInput'
 import { cnpj, cpf } from 'cpf-cnpj-validator'
-import { ToastContainer, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { toast } from 'react-toastify'
+
 
 const CreateNewCompany: React.FC = () => {
     const router = useRouter()
+
+    const redirectListClients = () => router.push('/app/clients')
+
     /* Valores dos formulários */
     const [codSegmento, setCodSegmento] = useState(0)
     const [uf, setUf] = useState('')
@@ -96,9 +99,6 @@ const CreateNewCompany: React.FC = () => {
 
     /* ENVIAR OS DADOS VIA POST */
 
-    const auth = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NjE4MjM1MTAsImV4cCI6MTY2MTg0MTUxMH0.vwgtThvc85PlyK2zg8NCcSmTQGMFvWdBK0n7krNe1Ck';
-
-
     const body = {
         cod: cod,
         name: name,
@@ -116,7 +116,7 @@ const CreateNewCompany: React.FC = () => {
         }
     }
 
-    const cadastrarCompany = (e) => {
+    /* const cadastrarCompany = (e) => {
         e.preventDefault()
         Api.post('/api/company/add', body)
             .then(res => {
@@ -124,6 +124,29 @@ const CreateNewCompany: React.FC = () => {
                 router.push('/app/clients')
             })
             .catch(erro => console.log(erro))
+    } */
+
+    const cadastrarCompany = (e) => {
+        e.preventDefault()
+        toast.promise(
+            Api.post('/api/company/add', body), {
+                pending: 'Processando',
+            success: {
+                render({ data }) {
+                    return (data?.data.res.msg)
+                },
+                delay: 700,
+                onClose: redirectListClients
+            },
+            error: {
+                render({ data }){
+                    return (data.response.data.erro)
+                },
+                delay: 700,
+                autoClose: 2000
+            }
+            }
+        )
     }
 
 
@@ -353,17 +376,16 @@ const CreateNewCompany: React.FC = () => {
                         <ButtonSave onClick={cadastrarCompany}>Salvar</ButtonSave>
 
                         <ButtonClose
-                        onClick={(e) => {
-                            e.preventDefault()
-                            router.push('/app/clients')
-                        }}
+                            onClick={(e) => {
+                                e.preventDefault()
+                                router.push('/app/clients')
+                            }}
                         >
                             Sair
                         </ButtonClose>
                     </ButtonsContainer>
                 </Form>
             </Content>
-            <ToastContainer></ToastContainer>
         </Container>
     )
 }
