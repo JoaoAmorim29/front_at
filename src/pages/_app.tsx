@@ -17,6 +17,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         limit={3} transition={Bounce}
         theme='colored'
         pauseOnFocusLoss={false}
+        autoClose={1000}
         ></ToastContainer>
     </>
 

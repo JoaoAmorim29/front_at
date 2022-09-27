@@ -28,13 +28,18 @@ import Api from '../../../../hooks/api'
 import api from '../../../../hooks/api'
 import { Bounce, toast, Zoom } from 'react-toastify';
 
-
-
 const CreateNewClient: React.FC = () => {
     const router = useRouter()
 
-    const redirectListClients = () => {
-        router.push('/app/clients')
+    const [url, setUrl] = useState()
+    const voltar = () => {
+        console.log(router.events.on())
+    }
+
+    const redirectListClients = (e) => {
+        e.preventDefault()
+        //router.push('/app/clients')
+        router.back()
     }
 
     const redirectNewCompany = () => {
@@ -71,7 +76,7 @@ const CreateNewClient: React.FC = () => {
     const sucessoId = 'sucesso'
     const erroId = 'erro'
 
-
+/* cadastro de cliente */
     const cadastrarClient = async (e: any) => {
         e.preventDefault()
         toast.promise(
@@ -80,13 +85,16 @@ const CreateNewClient: React.FC = () => {
             success: {
                 render({ data }) {
                     return (data?.data.res.msg)
-                }
+                },
+                delay: 700,
+                onClose: redirectListClients
             },
             error: {
                 render({ data }){
-                    console.log(data)
                     return (data.response.data.erro)
-                }
+                },
+                delay: 700,
+                autoClose: 2000
             }
         }
         )
@@ -256,6 +264,7 @@ const CreateNewClient: React.FC = () => {
 
 
                         <ButtonClose
+                            onClick={redirectListClients}
                         >
                             Sair
                         </ButtonClose>
