@@ -136,26 +136,15 @@ export const InputContainer = styled.div`
     }
 `
 
-export const RepeatTask = styled.select`
-    width: 47%;
-    height: 3rem;
-    outline: none;
-    box-sizing: border-box;
-    padding: 0.5rem;
-    border-radius: 0.1rem;
-    background-color: #FFF;
-    margin-top: 0.5rem;
-
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 14px;
-    display: flex;
-    align-items: center;
-
-    color: #A7A7A7;
+export const RepeatTask = styled.input.attrs(props => ({
+    type: 'checkbox'
+}))`
+    padding: .3rem;
+    position: relative;
+    top: .3rem;
+    border: none
 `
+
 
 export const Spacing = styled.div`
     margin: 0 10px 0 0;

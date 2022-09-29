@@ -119,12 +119,8 @@ const CreateNewTask: React.FC = () => {
                                 />
                             </InputContainer>
 
-                            
-
                             {/* Data Final */}
-                            <InputContainer style={{
-                                display: repert ? 'flex' : 'none'
-                            }}>
+                            <InputContainer style={() => {display: 'none'}}>
                                 <span>Até</span>
                                 <input
                                     type="date"
@@ -138,10 +134,15 @@ const CreateNewTask: React.FC = () => {
                             </InputContainer>
                         </InputContainer>
 
-                        <RepeatTask value={repert} onChange={(e) => setRepert(e.target.value)}>
+                        {/* <RepeatTask  onChange={(e) => {
+                            setRepert(e.target.value)
+                        }}>
                             <option value={true}>Repetir</option>
                             <option value={false}>Não se repetir</option>
-                        </RepeatTask>
+                        </RepeatTask> */}
+                        
+                        <RepeatTask></RepeatTask>
+
                     </InputLabel>
                     {/* Notify */}
                     <InputLabel>
