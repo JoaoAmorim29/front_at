@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import {useRouter} from 'next/router'
 
 import {
@@ -22,15 +22,30 @@ import {
     Table,
     ButtonRedirectView
 } from './styles'
+import client from './Client'
+import api from '../../../hooks/api'
+import { toast } from 'react-toastify'
+
 
 const Client: React.FC = () => {
     const router = useRouter()
     const [isActive, setIsActive] = useState('')
     const [buttonHeaderActive, setButtonHeaderActive] = useState(false)
-
     const handleSelectFilter = (filter: string) => {
         setIsActive(filter)
     }
+    const [clients, setClients] = useState([])
+
+    useEffect(() => {
+        api.get('/api/client')
+            .then(res => setClients(res.data.res))
+            .catch(erro => {
+                toast.warning('Erro ao carregar dados', {
+                    autoClose: 2500
+                })
+            })
+    }, [])
+
 
     const redirectViewClient = () => {
         router.push('/app/clients/my-client');
@@ -57,25 +72,36 @@ const Client: React.FC = () => {
     const columns = [
         {
             name: 'Title',
-            cell: (row: any) => <ButtonRedirectView onClick={redirectViewClient}>{row.title}</ButtonRedirectView>
+            cell: (row: any) => <ButtonRedirectView onClick={redirectViewClient}>{row.nome}</ButtonRedirectView>
         },
         {
-            name: 'Year',
-            cell: (row: any) => row.year
+            name: 'Empresa',
+            cell: (row: any) => row.razao_social
         },
         {
-            name: 'Year',
+            name: 'Segmento',
+            cell: (row: any) => row.nome_segmento
+        },
+        {
+            name: 'Cidade',
+            cell: (row: any) => row.nome_cidade
+        },
+        {
+            name: 'Ultima Interação'
+        },
+        {
+            name: 'Próxima interação',
             cell:() => <button onClick={() => alert('teste')} >Action</button>,
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-          },
+        }
     ];
     
     const data = [
         {
             id: 1,
-            title: 'Beetlejuice',
+            nome: 'Beetlejuice',
             year: '1988',
         },
         {
@@ -131,6 +157,9 @@ const Client: React.FC = () => {
                     </ButtonHeaderContainer>
                 </HeaderWrapper>
             </HeaderContainer>
+
+
+
             <Content>
                 <FilterContainer>
                     <FilterButton
@@ -158,11 +187,12 @@ const Client: React.FC = () => {
                         Filtro Avançado
                     </FilterButton>
                 </FilterContainer>
+
                 <TableContainer>
                     <Table
                         pagination
                         columns={columns}
-                        data={data}
+                        data={clients}
                         customStyles={customStyles}
                     />
                 </TableContainer>
