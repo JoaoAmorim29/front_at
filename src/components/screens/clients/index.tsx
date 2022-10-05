@@ -102,7 +102,7 @@ const Client: React.FC = () => {
         },
         {
             name: 'Cidade',
-            cell: (row: any) => row.nome_cidade
+            cell: (row: any) => row.cidade
         },
         {
             name: 'Ultima Interação'

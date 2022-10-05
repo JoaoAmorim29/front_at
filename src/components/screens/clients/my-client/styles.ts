@@ -4,6 +4,27 @@ interface IHeaderButtonProps {
     isActive: boolean
 }
 
+/* 
+    author: Thiago Martins
+*/
+
+
+export const CommomLabel = styled.label`
+    font-size: ${props=>props.labelSize || '18px'};
+    color: ${props => props.labelColor || '#000'};
+`
+
+export const Separator = styled.div`
+    position: relative;
+    width: 100%;
+    heigth: 20px;
+    background: #F0F;
+    
+`
+
+/* 
+    author Rai Lopes
+*/
 export const Container = styled.div`
     display: grid;
     grid-template-columns: auto;
@@ -57,7 +78,7 @@ export const HeaderTitle = styled.h1`
 // *********************************************
 export const Wrapper = styled.div`
     display: grid;
-    grid-template-rows: 14rem auto;
+    grid-template-rows: 20rem auto;
     gap: 1rem;
 `
 
@@ -71,7 +92,7 @@ export const UserInfoContainer = styled.div`
     padding: 1rem;
     
     width: 19rem;
-    height: 14rem;
+    height: ${props => props.height || '14rem'};
 
     background: #FFFFFF;
     box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.25);
@@ -107,7 +128,7 @@ export const UserInfoTitle = styled.span`
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 400;
-    font-size: 20px;
+    font-size: 16px;
     line-height: 23px;
     color: #9E9E9E;
 `

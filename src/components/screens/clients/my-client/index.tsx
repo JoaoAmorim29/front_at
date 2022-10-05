@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import {ActivityHistories} from './activity-histories'
+import { ActivityHistories } from './activity-histories'
 import { ScheduleActivities } from './scheduled-activities'
 import { LateActivities } from './late-activities'
 
@@ -32,12 +32,45 @@ import {
     UserInfoTitle,
     ContentUser,
     ContentHeader,
-    ContentHeaderButton
+    ContentHeaderButton,
+    CommomLabel,
+    Separator
 } from './styles'
+import api from '../../../../hooks/api'
+import { toast } from 'react-toastify'
 
 const MyClient: React.FC = () => {
     const router = useRouter()
     const [isActiveHeader, setIsActiveHeader] = useState(0)
+
+    const [dadosClient, setDadosClient] = useState([])
+
+
+    const { uuid } = router.query
+    useEffect(() => {
+        api.get(`/api/client/${uuid}`)
+            .then(response => {
+                setDadosClient(response.data.res[0])
+            })
+            .catch(erro => {
+                let msg = erro.response.data.erro
+                toast.warning('Erro ao carregar dados do cliente', {
+                    autoClose: 2500,
+                    onClose: () => {
+                        router.back()
+                        console.log(msg)
+                    }
+                })
+            })
+    }, [])
+
+
+
+    const {
+        nome,
+        cidade,
+        estado
+    } = dadosClient
 
     const handleActiveButtonHeader = (number: number) => {
         if (isActiveHeader == number) {
@@ -54,19 +87,30 @@ const MyClient: React.FC = () => {
         <Container>
             <HeaderContainer>
                 <HeaderWrapper>
-                    <MdArrowBack 
+                    <MdArrowBack
                         onClick={redirectListClients}
-                        size={24} 
-                        color='#4D4D4D' 
-                        cursor= 'pointer'
+                        size={24}
+                        color='#4D4D4D'
+                        cursor='pointer'
                     />
-                    <HeaderTitle>NOVO CLIENTE</HeaderTitle>
+                    <HeaderTitle>MEU CLIENTE</HeaderTitle>
                 </HeaderWrapper>
             </HeaderContainer>
             <Content>
                 <Wrapper>
-                    <UserInfoContainer>
-                        <UserInfoAvatar></UserInfoAvatar>
+                    <UserInfoContainer height="20rem">
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center'
+                        }}>
+                            <UserInfoAvatar></UserInfoAvatar>
+                            <CommomLabel labelColor="#a3a3a3">{nome}</CommomLabel>
+                            <CommomLabel labelColor="#a3a3a3" labelSize="13px">{cidade}, {estado}</CommomLabel>
+                        </div>
+
+                        <CommomLabel labelColor="#a3a3a3" labelSize="10px">Informações do Contato</CommomLabel>
+                        <Separator></Separator>
                         <UserInfoIcons>
                             <MdCreate size={24} color='#4C4C4C' cursor='pointer' />
                             <MdPhone size={24} color='#4C4C4C' cursor='pointer' />
@@ -75,22 +119,18 @@ const MyClient: React.FC = () => {
                             <ImTelegram size={24} color='#4C4C4C' cursor='pointer' />
                             <ImWhatsapp size={24} color='#4C4C4C' cursor='pointer' />
                         </UserInfoIcons>
-                        <UserInfoTitle>
-                            <ImUser size={24} color='#4C4C4C' cursor='pointer' />
-                            Rai Lopes
-                        </UserInfoTitle>
                     </UserInfoContainer>
 
                     <UserInfoContainer>
                         <UserInfoAvatar></UserInfoAvatar>
-                            <MdCreate size={24} color='#4C4C4C' cursor='pointer' style={{marginTop: '1rem'}} />
+                        <MdCreate size={24} color='#4C4C4C' cursor='pointer' style={{ marginTop: '1rem' }} />
                         <UserInfoTitle>
                             <ImOffice size={24} color='#4C4C4C' cursor='pointer' />
                             Localweb Serviços LTDA.
                         </UserInfoTitle>
                     </UserInfoContainer>
                 </Wrapper>
-                
+
                 <ContentUser>
                     <ContentHeader>
                         <ContentHeaderButton
@@ -115,7 +155,7 @@ const MyClient: React.FC = () => {
                     {isActiveHeader === 0 && (
                         <ActivityHistories />
                     )}
-                     {isActiveHeader === 1 && (
+                    {isActiveHeader === 1 && (
                         <ScheduleActivities />
                     )}
                     {isActiveHeader === 2 && (
