@@ -38,17 +38,24 @@ const Client: React.FC = () => {
 
     useEffect(() => {
         api.get('/api/client')
-            .then(res => setClients(res.data.res))
+            .then(res => {
+                setClients(res.data.res)
+            })
             .catch(erro => {
-                toast.warning('Erro ao carregar dados', {
+                let msg = erro.response.data.erro
+                toast.warning( msg === '' ? 'Erro ao carregar dados' : msg, {
                     autoClose: 2500
                 })
             })
     }, [])
 
 
-    const redirectViewClient = () => {
-        router.push('/app/clients/my-client');
+    const redirectViewClient = (row) => {
+       
+    }
+    
+    const select = () => {
+        console.log('teste')
     }
 
     const customStyles = {
@@ -69,10 +76,21 @@ const Client: React.FC = () => {
         },
     };
 
+    const [selectRow, setSelectRow] = useState([])
+    const handleChange = ({ selectedRows}) => {
+        console.log(selectedRows)
+        setSelectRow(selectedRows)
+    }
+
     const columns = [
         {
             name: 'Title',
-            cell: (row: any) => <ButtonRedirectView onClick={redirectViewClient}>{row.nome}</ButtonRedirectView>
+            cell: (row: any) => <ButtonRedirectView onClick={() => {
+                router.push({
+                    pathname: '/app/clients/my-client/[uuid]',
+                    query: {uuid: row.codigo}
+                })
+            }}>{row.nome}</ButtonRedirectView>,
         },
         {
             name: 'Empresa',
@@ -97,19 +115,6 @@ const Client: React.FC = () => {
             button: true,
         }
     ];
-    
-    const data = [
-        {
-            id: 1,
-            nome: 'Beetlejuice',
-            year: '1988',
-        },
-        {
-            id: 2,
-            title: 'Ghostbusters',
-            year: '1984',
-        },
-    ]
 
     return (
         <Container>

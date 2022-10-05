@@ -87,13 +87,13 @@ const CreateNewClient: React.FC = () => {
                     return (data?.data.res.msg)
                 },
                 delay: 700,
-                onClose: redirectListClients
+                onClose: router.back
             },
             error: {
                 render({ data }){
                     return (data.response.data.erro)
                 },
-                delay: 700,
+                //delay: 700,
                 autoClose: 2000
             }
         }
