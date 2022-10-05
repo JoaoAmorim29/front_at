@@ -89,7 +89,7 @@ const Client: React.FC = () => {
                 router.push({
                     pathname: '/app/clients/my-client/[uuid]',
                     query: {uuid: row.codigo}
-                })
+                }, 'client')
             }}>{row.nome}</ButtonRedirectView>,
         },
         {

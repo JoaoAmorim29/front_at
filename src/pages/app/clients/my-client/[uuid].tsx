@@ -1,6 +1,6 @@
 import React from 'react'
 import Layout from '../../../../components/layout/main'
-import MyClient from '../../../../components/screens/clients/my-client/[uuid]'
+import MyClient from '../../../../components/screens/clients/my-client'
 
 const MyClientPage: React.FC = () => {
     return (
