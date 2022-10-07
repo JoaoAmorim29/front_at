@@ -114,7 +114,7 @@ export const UserInfoIcons = styled.div`
     gap: 1rem;
     justify-content: center;
     align-items: center;
-    margin-top: 0.5rem;
+    margin-bottom: 3rem;
 `
 
 export const UserInfoTitle = styled.span`

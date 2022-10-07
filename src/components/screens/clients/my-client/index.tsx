@@ -44,10 +44,13 @@ const MyClient: React.FC = () => {
     const [isActiveHeader, setIsActiveHeader] = useState(0)
 
     const [dadosClient, setDadosClient] = useState([])
+    const [contatosClient, setContatosClient] = useState([])
 
+    const uuid = router.query.uuid
+    const sizeBtnContato = 16
 
-    const { uuid } = router.query
     useEffect(() => {
+        /* DADOS DO CLIENTE */
         api.get(`/api/client/${uuid}`)
             .then(response => {
                 setDadosClient(response.data.res[0])
@@ -57,14 +60,27 @@ const MyClient: React.FC = () => {
                 toast.warning('Erro ao carregar dados do cliente', {
                     autoClose: 2500,
                     onClose: () => {
-                        router.back()
+                        // router.back()
                         console.log(msg)
                     }
                 })
             })
+
+
+
     }, [])
 
 
+    useEffect(() => {
+        /* CONTATOS DO CLIENTE */
+        api.get(`/api/client/customer-contact/${uuid}`)
+            .then(response => {
+                setContatosClient(response.data.res)
+            })
+            .catch(erro => {
+                erro.response
+            })
+    }, [])
 
     const {
         nome,
@@ -106,19 +122,55 @@ const MyClient: React.FC = () => {
                         }}>
                             <UserInfoAvatar></UserInfoAvatar>
                             <CommomLabel labelColor="#a3a3a3">{nome}</CommomLabel>
-                            <CommomLabel labelColor="#a3a3a3" labelSize="13px">{cidade}, {estado}</CommomLabel>
+                            <CommomLabel labelColor="#a3a3a3" labelSize="15px">{cidade}, {estado}</CommomLabel>
                         </div>
 
-                        <CommomLabel labelColor="#a3a3a3" labelSize="10px">Informações do Contato</CommomLabel>
+                        <CommomLabel labelColor="#a3a3a3" labelSize="12px">Informações do Contato</CommomLabel>
                         <Separator></Separator>
+
                         <UserInfoIcons>
-                            <MdCreate size={24} color='#4C4C4C' cursor='pointer' />
-                            <MdPhone size={24} color='#4C4C4C' cursor='pointer' />
-                            <MdModeComment size={24} color='#4C4C4C' cursor='pointer' />
-                            <MdEmail size={24} color='#4C4C4C' cursor='pointer' />
-                            <ImTelegram size={24} color='#4C4C4C' cursor='pointer' />
-                            <ImWhatsapp size={24} color='#4C4C4C' cursor='pointer' />
+                            {contatosClient.map(contato => {
+                                return (
+                                    <>
+                                        <p style={{
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            position: 'relative',
+                                            left: '30px',
+                                            wordSpacing: '10px',
+                                            fontSize: '13px'
+                                        }}>
+                                            <MdPhone size={24} color='#4C4C4C' cursor='pointer'/>{contato.phone}
+                                        </p>
+                                        <div style={{
+                                            position: 'relative',
+                                            left: '30px',
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            paddingRight: '6px',
+                                            width: '7rem',
+                                            justifyContent: 'space-around'
+                                        }}>
+                                            <MdModeComment size={sizeBtnContato} onClick={() => {
+                                                alert(contato.phone)
+                                            }} color='#4C4C4C' cursor='pointer' />
+                                            <MdEmail size={sizeBtnContato} onClick={() => {
+                                                alert(contato.phone)
+                                            }}color='#4C4C4C' cursor='pointer' />
+                                            <ImTelegram size={sizeBtnContato} onClick={() => {
+                                                alert(contato.phone)
+                                            }}color='#4C4C4C' cursor='pointer' />
+                                            <ImWhatsapp size={sizeBtnContato} onClick={() => {
+                                                alert(contato.phone)
+                                            }}color='#4C4C4C' cursor='pointer' />
+                                        </div>
+                                    </>
+                                )
+                            })}
+
                         </UserInfoIcons>
+
                     </UserInfoContainer>
 
                     <UserInfoContainer>
