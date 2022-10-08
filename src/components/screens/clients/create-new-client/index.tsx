@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import InputMask from "react-input-mask";
 import { useRouter } from 'next/router'
 import {
     MdArrowBack,
@@ -22,11 +23,12 @@ import {
     RepeatTask,
     ButtonsContainer,
     ButtonSave,
-    ButtonClose
+    ButtonClose,
 } from './styles'
 import Api from '../../../../hooks/api'
 import api from '../../../../hooks/api'
 import { Bounce, toast, Zoom } from 'react-toastify';
+import validate from './validate'
 
 
 
@@ -50,6 +52,16 @@ const CreateNewClient: React.FC = () => {
     const [email, setEmail] = useState('')
     const [nome, setNome] = useState('')
 
+    const [errors, setErrors] = useState({
+        name: '',
+        codCompany: '',
+        note: '',
+        contact: {
+            phone: '',
+            email: ''
+        }
+    })
+
     const body = {
         name: nome,
         codCompany: codEmpresa,
@@ -59,6 +71,7 @@ const CreateNewClient: React.FC = () => {
             email: email
         }
     }
+
 
     /* const cadastrarClient = (e) => {
         e.preventDefault()
@@ -71,9 +84,11 @@ const CreateNewClient: React.FC = () => {
     const sucessoId = 'sucesso'
     const erroId = 'erro'
 
-
     const cadastrarClient = async (e: any) => {
         e.preventDefault()
+
+        setErrors(validate(body))
+
         toast.promise(
             api.post('/api/client/add', body), {
             pending: 'Processando',
@@ -91,6 +106,7 @@ const CreateNewClient: React.FC = () => {
         }
         )
     }
+
 
     const selectEmpresa = (e) => {
         let cod = e.target.value
@@ -140,7 +156,7 @@ const CreateNewClient: React.FC = () => {
                     {/* Nome Cliente */}
                     <InputLabel>
                         <label>Nome do Cliente</label>
-                        <InputContainer>
+                        <InputContainer errorStyle={errors.name}>
                             <MdPerson
                                 size={32}
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
@@ -151,13 +167,15 @@ const CreateNewClient: React.FC = () => {
                                 value={nome}
                                 onChange={(e) => setNome(e.target.value)}
                             />
+
                         </InputContainer>
+                        {errors.name && <span className='formField__error'>{errors.name}</span>}
                     </InputLabel>
 
                     {/* Nome Empresa */}
                     <InputLabel>
                         <label>Nome da Empresa</label>
-                        <InputContainer>
+                        <InputContainer errorStyle={errors.codCompany}>
                             <MdOutlineDomain
                                 size={32}
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
@@ -173,6 +191,7 @@ const CreateNewClient: React.FC = () => {
                             </select>
                         </InputContainer>
                         <a onClick={redirectNewCompany}>Adicionar nova empresa</a>
+                        {errors.codCompany && <span className='formField__error'>{errors.codCompany}</span>}
                     </InputLabel>
 
                     {/* Seguimento */}
@@ -198,24 +217,26 @@ const CreateNewClient: React.FC = () => {
                     {/* Telefone */}
                     <InputLabel>
                         <label>Telefone do cliente</label>
-                        <InputContainer>
+                        <InputContainer errorStyle={errors.contact.phone}>
                             <MdOutlineCall
                                 size={32}
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                            <input
-                                placeholder="(XX) 9 XXXX-XXXX"
+                            <InputMask
+                                mask='(999) 9 9999-9999'
+                                placeholder="(XXX) 9 XXXX-XXXX"
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
                             />
                         </InputContainer>
+                        {errors.contact.phone && <span className='formField__error'>{errors.contact.phone}</span>}
                     </InputLabel>
 
                     {/* Email */}
                     <InputLabel>
                         <label>E-mail do cliente</label>
-                        <InputContainer>
+                        <InputContainer errorStyle={errors.contact.email}>
                             <MdEmail
                                 size={32}
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
@@ -227,12 +248,13 @@ const CreateNewClient: React.FC = () => {
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </InputContainer>
+                        {errors.contact.email && <span className='formField__error'>{errors.contact.email}</span>}
                     </InputLabel>
 
                     {/* Description */}
                     <InputLabel>
                         <label>Nota sobre o cliente</label>
-                        <InputContainer>
+                        <InputContainer errorStyle={errors.note}>
                             <MdOutlineFormatAlignLeft
                                 size={32}
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
@@ -246,6 +268,7 @@ const CreateNewClient: React.FC = () => {
 
                             </textarea>
                         </InputContainer>
+                        {errors.note && <span className='formField__error'>{errors.note}</span>}
                     </InputLabel>
 
                     <ButtonsContainer>

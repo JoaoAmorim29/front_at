@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import InputMask from "react-input-mask";
 import { useRouter } from 'next/router'
 import {
     MdArrowBack,
@@ -20,6 +21,8 @@ import {
     Form,
     InputLabel,
     InputContainer,
+    InputAdress,
+    SelectAdress,
     Spacing,
     SpacingBottom,
     ButtonsContainer,
@@ -31,10 +34,11 @@ import {
 import extension from './segmentos'
 import axios from 'axios'
 import Api from '../../../../hooks/api'
-import CodInput from './codInput'
+import codInput from './codInput'
 import { cnpj, cpf } from 'cpf-cnpj-validator'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import validate from './validate';
 
 const CreateNewCompany: React.FC = () => {
     const router = useRouter()
@@ -87,9 +91,7 @@ const CreateNewCompany: React.FC = () => {
                     setUf(res.data.state)
                     setLoadCep('none')
                 })
-                .catch(erro => {
-                    console.log(erro)
-                })
+                .catch(erro => console.log(erro))
         }
     }
 
@@ -98,6 +100,29 @@ const CreateNewCompany: React.FC = () => {
 
     const auth = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NjE4MjM1MTAsImV4cCI6MTY2MTg0MTUxMH0.vwgtThvc85PlyK2zg8NCcSmTQGMFvWdBK0n7krNe1Ck';
 
+    /* Máscaras de CPF ou CPNJ */
+    const masks = {
+        cpf: '999.999.999-99',
+        cpnj: '99.999.999/9999-99'
+    }
+
+    /* Valores errors */
+    const [errors, setErrors] = useState({
+        cod: '',
+        name: '',
+        segment: '',
+        obs: '',
+        address: {
+            cep: '',
+            uf: '',
+            city: '',
+            address: '',
+            district: '',
+            n: '',
+            cmpl: '',
+            str: ''
+        }
+    })
 
     const body = {
         cod: cod,
@@ -115,15 +140,20 @@ const CreateNewCompany: React.FC = () => {
             str: rua
         }
     }
-
+    
     const cadastrarCompany = (e) => {
         e.preventDefault()
+
+        /* Validar campos */
+        
         Api.post('/api/company/add', body)
             .then(res => {
                 console.log(res)
                 router.push('/app/clients')
             })
-            .catch(erro => console.log(erro))
+            .catch(erro => {
+                setErrors(validate(body))
+            })
     }
 
 
@@ -154,10 +184,10 @@ const CreateNewCompany: React.FC = () => {
                 <Form
                 >
                     {/* Document */}
-
+                    
                     <InputLabel>
                         <label>CNPJ/CPF</label>
-                        <InputContainer>
+                        <InputContainer errorStyle={errors.cod}>
                             <MdPerson
                                 size={32}
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
@@ -169,7 +199,8 @@ const CreateNewCompany: React.FC = () => {
                                 onChange={(e) => setCod(e.target.value)}
                                 ></CodInput> */}
 
-                            <input
+                            <InputMask
+                                mask= {masks.cpnj}
                                 type="text"
                                 placeholder='CNPJ/CPF'
                                 value={cod}
@@ -178,12 +209,13 @@ const CreateNewCompany: React.FC = () => {
                             />
 
                         </InputContainer>
+                        {errors.cod && <span>{errors.cod}</span>}
                     </InputLabel>
 
                     {/* Nome Empresa */}
                     <InputLabel>
                         <label>Nome da Empresa</label>
-                        <InputContainer>
+                        <InputContainer errorStyle={errors.name}>
                             <MdOutlineDomain
                                 size={32}
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
@@ -195,12 +227,13 @@ const CreateNewCompany: React.FC = () => {
                                 onChange={(e) => setName(e.target.value)}
                             />
                         </InputContainer>
+                        {errors.name && <span className='formField__error'>{errors.name}</span>}
                     </InputLabel>
 
                     {/* Seguimento */}
                     <InputLabel>
                         <label>Seguimento da Empresa</label>
-                        <InputContainer>
+                        <InputContainer errorStyle={errors.segment}>
                             <MdOutlineWork
                                 size={32}
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
@@ -215,6 +248,7 @@ const CreateNewCompany: React.FC = () => {
                                 })}
                             </select>
                         </InputContainer>
+                        {errors.segment && <span className='formField__error'>{errors.segment}</span>}
                     </InputLabel>
 
                     {/* Endereço */}
@@ -233,97 +267,133 @@ const CreateNewCompany: React.FC = () => {
 
                             {/* CEP */}
                             {/* Vai carregar os dados do endereço via API */}
-                            <input
-                                type="text"
-                                placeholder="Informe o CEP"
-                                maxLength="8"
-                                onChange={addressApi}
-                            />
-
-                            <BiLoader
-                                size={15}
-                                style={{
-                                    display: loadCep,
-                                    minWidth: '32px',
-                                    marginLeft: '-3rem',
-                                    marginRight: '1rem'
-                                }}
-                                color='#A7A7A7'
-                            />
+                            <div className="inputContainerDiv">
+                                <InputAdress
+                                    errorStyle={errors.address.cep}
+                                    type="text"
+                                    placeholder="Informe o CEP"
+                                    maxLength = "8"
+                                    onChange={addressApi}
+                                />
+                            
+                                <BiLoader
+                                    size={15}
+                                    style={{
+                                        display: loadCep,
+                                        minWidth: '32px',
+                                        marginLeft: '-3rem',
+                                        marginRight: '1rem'
+                                    }}
+                                    color='#A7A7A7'
+                                />
+                                {errors.address.cep && <span className='formField__error'>{errors.address.cep}</span>}
+                            </div>
 
                             <Spacing />
 
                             {/* Estado */}
-                            <select value={uf} onChange={(e) => setUf(e.target.value)}>
-                                <option value="">Estado</option>
-                                {
-                                    estado.map((s, key) => {
-                                        return (
-                                            <option value={s.uf} key={s.cod}>{s.estado}</option>
-                                        )
-                                    })
-                                }
-                            </select>
+                            <div className="inputContainerDiv">
+                                <SelectAdress errorStyle={errors.address.uf} value={uf} onChange={(e) => setUf(e.target.value)}>
+                                    <option value="">Estado</option>
+                                    {
+                                        estado.map((s, key) => {
+                                            return (
+                                                <option value={s.uf} key={s.cod}>{s.estado}</option>
+                                            )
+                                        })
+                                    }
+                                </SelectAdress>
+                                {errors.address.uf && <span className='formField__error'>{errors.address.uf}</span>}
+                            </div>
+
                             <Spacing />
+
                             {/* cidade */}
-                            <input
-                                type="text"
-                                placeholder="Cidade"
-                                value={cidade}
-                                onChange={(e) => setCidade(e.target.value)}
-                            />
+                            <div className="inputContainerDiv">
+                                <InputAdress
+                                    errorStyle={errors.address.city}
+                                    type="text"
+                                    placeholder="Cidade"
+                                    value={cidade}
+                                    onChange={(e) => setCidade(e.target.value)}
+                                />
+                                {errors.address.city && <span className='formField__error'>{errors.address.city}</span>}
+                            </div>
                         </InputContainer>
+
                         <SpacingBottom />
+
                         <InputContainer>
                             {/* Endereço */}
-                            <input
+                            <div className="inputContainerDiv">
+                            <InputAdress
+                                errorStyle={errors.address.address}
                                 type="text"
                                 placeholder="Endereço"
                                 value={endereco}
                                 onChange={(e) => setEndereco(e.target.value)}
                             />
+                            {errors.address.address && <span className='formField__error'>{errors.address.address}</span>}
+                            </div>
+                           
                             <Spacing />
 
-                            <input
-                                type="text"
-                                placeholder='Bairro'
-                                value={bairro}
-                                onChange={(e) => setBairro(e.target.value)}
-                            />
-
-
+                            <div className="inputContainerDiv">
+                                <InputAdress
+                                    errorStyle={errors.address.district}
+                                    type="text"
+                                    placeholder='Bairro'
+                                    value={bairro}
+                                    onChange={(e) => setBairro(e.target.value)}
+                                />
+                                {errors.address.district && <span className='formField__error'>{errors.address.district}</span>}
+                            </div>
+                            
                             <Spacing />
 
-                            <input
-                                type="text"
-                                placeholder="Número"
-                                value={numero}
-                                onChange={(e) => setNumero(e.target.value)}
+                            <div className="inputContainerDiv">
+                                <InputAdress
+                                    errorStyle={errors.address.n}
+                                    type="text"
+                                    placeholder="Número"
+                                    value={numero}
+                                    onChange={(e) => setNumero(e.target.value)}
 
-                            />
+                                />
+                                {errors.address.n && <span className='formField__error'>{errors.address.n}</span>}
+                            </div>
                         </InputContainer>
 
                         <SpacingBottom />
 
                         <InputContainer>
                             {/* Complemento */}
-                            <input
-                                type="text"
-                                placeholder="Complemento"
-                                maxLength="100"
-                                value={complemento}
-                                onChange={(e) => setComplemento(e.target.value)}
-                            />
-                            <Spacing />
-                            {/* Rua */}
-                            <input
-                                type="text"
-                                placeholder="Rua"
-                                maxLength="100"
-                                value={rua}
-                                onChange={(e) => setRua(e.target.value)}
-                            />
+                            <div className="inputContainerDiv">
+                                <InputAdress
+                                    errorStyle={errors.address.cmpl}
+                                    type="text"
+                                    placeholder="Complemento"
+                                    maxLength="100"
+                                    value={complemento}
+                                    onChange={(e) => setComplemento(e.target.value)}
+                                />
+                                {errors.address.cmpl && <span className='formField__error'>{errors.address.cmpl}</span>}
+                            </div>
 
+                            <Spacing />
+
+                            {/* Rua */}
+                            <div className="inputContainerDiv">
+                                <InputAdress
+                                    errorStyle={errors.address.str}
+                                    type="text"
+                                    placeholder="Rua"
+                                    maxLength="100"
+                                    value={rua}
+                                    onChange={(e) => setRua(e.target.value)}
+                                />
+                                {errors.address.str && <span className='formField__error'>{errors.address.str}</span>}
+                            </div>
 
                         </InputContainer>
 
@@ -332,7 +402,7 @@ const CreateNewCompany: React.FC = () => {
                     {/* Description */}
                     <InputLabel>
                         <label>Nota sobre o cliente</label>
-                        <InputContainer>
+                        <InputContainer errorStyle={errors.obs}>
                             <MdOutlineFormatAlignLeft
                                 size={32}
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
@@ -346,6 +416,7 @@ const CreateNewCompany: React.FC = () => {
 
                             </textarea>
                         </InputContainer>
+                        {errors.obs && <span className='formField__error'>{errors.obs}</span>}
                     </InputLabel>
 
                     <ButtonsContainer>

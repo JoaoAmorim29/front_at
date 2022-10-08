@@ -79,6 +79,14 @@ export const InputLabel = styled.div`
         align-items: center;
         color: #0692C8;  
     }
+
+    span{
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 700;
+        font-size: 12px;
+        color: #cc3300;
+    }
 `
 
 export const InputContainer = styled.div`
@@ -95,7 +103,8 @@ export const InputContainer = styled.div`
         outline: none;
         box-sizing: border-box;
         padding: 0.5rem;
-        border-radius: 0.1rem;
+        border: ${props  => props.errorStyle ? '1px solid #DB5A5A' : ''};
+        border-radius: 0.2rem;
         background-color: #FFF;
 
         font-family: 'Roboto';

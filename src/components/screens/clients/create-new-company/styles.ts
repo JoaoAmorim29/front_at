@@ -79,6 +79,14 @@ export const InputLabel = styled.div`
         align-items: center;
         color: #0692C8;  
     }
+
+    span{
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 700;
+        font-size: 12px;
+        color: #cc3300;
+    }
 `
 
 export const InputContainer = styled.div`
@@ -88,14 +96,14 @@ export const InputContainer = styled.div`
     align-items: center;
     justify-content: center;
 
-
     input, select, textarea {
         width: 100%;
         height: 3rem;
         outline: none;
         box-sizing: border-box;
         padding: 0.5rem;
-        border-radius: 0.1rem;
+        border: ${props => props.errorStyle ? '1px solid #DB5A5A' : ''};
+        border-radius: .2rem;
         background-color: #FFF;
 
         font-family: 'Roboto';
@@ -107,6 +115,11 @@ export const InputContainer = styled.div`
         align-items: center;
 
         color: #A7A7A7;
+    }
+
+    .inputContainerDiv{
+        width: 100%;
+        padding: 0;
     }
 
     textarea {
@@ -124,6 +137,13 @@ export const InputContainer = styled.div`
         display: flex;
         align-items: center;
     }
+`
+export const InputAdress = styled.input`
+    border: ${props => props.errorStyle ? '1px solid #DB5A5A' : ''};
+`
+
+export const SelectAdress = styled.select`
+    border: ${props => props.errorStyle ? '1px solid #DB5A5A' : ''};
 `
 
 export const RepeatTask = styled.select`

@@ -1,6 +1,6 @@
 import InputMask from "react-input-mask";
 
-export default (props) => {
+const codInput = (props: any) => {
     return (
         <InputMask
             mask='99.999.999/9999-99'
@@ -11,3 +11,5 @@ export default (props) => {
         </InputMask>
     )
 }
+
+export default codInput
