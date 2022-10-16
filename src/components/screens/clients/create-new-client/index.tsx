@@ -81,7 +81,7 @@ const CreateNewClient: React.FC = () => {
         setCodEmpresa(codCompany)
         setNote(note)
         setPhone(phone)
-        setEmail(phone)
+        setEmail(email)
 
         console.log(body)
 
