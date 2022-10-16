@@ -98,7 +98,7 @@ const Client: React.FC = () => {
                 </HeaderWrapper>
                 <HeaderWrapper>
                     <HeaderInputContainer>
-                        <input type='text' placeholder='Pesquisar' />
+                        <input type='text' placeholder='Pesquisar'/>
                         <button>
                             <MdSearch size={24} color='#FFF' />
                         </button>
@@ -122,7 +122,7 @@ const Client: React.FC = () => {
                             >
                                 Novo Empresa
                             </span>
-                            <span
+                            <span 
                                 onClick={() => router.push('/app/clients/new-client')}
                             >
                                 Importar Contatos
@@ -158,12 +158,12 @@ const Client: React.FC = () => {
                         Filtro Avançado
                     </FilterButton>
                 </FilterContainer>
-                <TableContainer>
+                <TableContainer >
                     <Table
-                        pagination
                         columns={columns}
                         data={data}
                         customStyles={customStyles}
+                        pagination
                     />
                 </TableContainer>
             </Content>

@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import InputMask from "react-input-mask";
+//import InputMask from "react-input-mask";
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/router'
 import {
     MdArrowBack,
@@ -28,9 +31,6 @@ import {
 import Api from '../../../../hooks/api'
 import api from '../../../../hooks/api'
 import { Bounce, toast, Zoom } from 'react-toastify';
-import validate from './validate'
-
-
 
 const CreateNewClient: React.FC = () => {
     const router = useRouter()
@@ -51,27 +51,7 @@ const CreateNewClient: React.FC = () => {
     const [phone, setPhone] = useState('')
     const [email, setEmail] = useState('')
     const [nome, setNome] = useState('')
-
-    const [errors, setErrors] = useState({
-        name: '',
-        codCompany: '',
-        note: '',
-        contact: {
-            phone: '',
-            email: ''
-        }
-    })
-
-    const body = {
-        name: nome,
-        codCompany: codEmpresa,
-        note: note,
-        contact: {
-            phone: phone,
-            email: email
-        }
-    }
-
+   
 
     /* const cadastrarClient = (e) => {
         e.preventDefault()
@@ -84,10 +64,26 @@ const CreateNewClient: React.FC = () => {
     const sucessoId = 'sucesso'
     const erroId = 'erro'
 
-    const cadastrarClient = async (e: any) => {
-        e.preventDefault()
+    const body = {
+        name: nome,
+        codCompany: codEmpresa,
+        note: note,
+        contact: {
+            phone: phone,
+            email: email
+        }
+    }
 
-        setErrors(validate(body))
+
+    const cadastrarClient = async({name, codCompany, note, phone, email}: any) => {
+
+        setNome(name)
+        setCodEmpresa(codCompany)
+        setNote(note)
+        setPhone(phone)
+        setEmail(phone)
+
+        console.log(body)
 
         toast.promise(
             api.post('/api/client/add', body), {
@@ -135,6 +131,18 @@ const CreateNewClient: React.FC = () => {
             .catch(erro => console.log(erro))
     }, [])
 
+    const Schema = yup.object().shape({
+        name: yup.string().required('Nome é obrigatório.'),
+        codCompany: yup.number().min(1, 'Empresa é obrigatória.').required('Empresa é obrigatória.'),
+        note: yup.string().required('Descrição é obrigatória.'),
+        phone: yup.string().required('Telefone é obrigatório.').min(12, 'Digite um número válido.'),
+        email: yup.string().required('Email é obrigatório.').email('Insira um email válido.')
+    })
+
+    const {register, handleSubmit, formState: {errors}} = useForm({
+        mode: 'onChange',
+        resolver: yupResolver(Schema),
+    });
 
     return (
         <Container>
@@ -151,7 +159,7 @@ const CreateNewClient: React.FC = () => {
             </HeaderContainer>
 
             <Content>
-                <Form
+                <Form onSubmit={handleSubmit(cadastrarClient)}
                 >
                     {/* Nome Cliente */}
                     <InputLabel>
@@ -164,24 +172,24 @@ const CreateNewClient: React.FC = () => {
                             />
                             <input
                                 placeholder="Adicionar título"
-                                value={nome}
-                                onChange={(e) => setNome(e.target.value)}
+                                id='name'
+                                {...register('name')}
                             />
 
                         </InputContainer>
-                        {errors.name && <span className='formField__error'>{errors.name}</span>}
+                        {errors.name && <span className='formField__error'>{errors.name.message}</span>}
                     </InputLabel>
 
                     {/* Nome Empresa */}
                     <InputLabel>
                         <label>Nome da Empresa</label>
-                        <InputContainer errorStyle={errors.codCompany}>
+                        <InputContainer errorStyle= {errors.codCompany}>
                             <MdOutlineDomain
                                 size={32}
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                            <select value={codEmpresa} onChange={selectEmpresa}>
+                            <select id='codCompany' {...register('codCompany')}>
                                 <option value="0">Selecione a empresa</option>
                                 {empresas.map((empresa, key) => {
                                     return (
@@ -191,7 +199,7 @@ const CreateNewClient: React.FC = () => {
                             </select>
                         </InputContainer>
                         <a onClick={redirectNewCompany}>Adicionar nova empresa</a>
-                        {errors.codCompany && <span className='formField__error'>{errors.codCompany}</span>}
+                        {errors.codCompany && <span className='formField__error'>{errors.codCompany.message}</span>}
                     </InputLabel>
 
                     {/* Seguimento */}
@@ -217,26 +225,25 @@ const CreateNewClient: React.FC = () => {
                     {/* Telefone */}
                     <InputLabel>
                         <label>Telefone do cliente</label>
-                        <InputContainer errorStyle={errors.contact.phone}>
+                        <InputContainer errorStyle={errors.phone}>
                             <MdOutlineCall
                                 size={32}
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                            <InputMask
-                                mask='(999) 9 9999-9999'
+                            <input
                                 placeholder="(XXX) 9 XXXX-XXXX"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
+                                id='phone'
+                                {...register('phone')}
                             />
                         </InputContainer>
-                        {errors.contact.phone && <span className='formField__error'>{errors.contact.phone}</span>}
+                        {errors.phone && <span className='formField__error'>{errors.phone.message}</span>}
                     </InputLabel>
 
                     {/* Email */}
                     <InputLabel>
                         <label>E-mail do cliente</label>
-                        <InputContainer errorStyle={errors.contact.email}>
+                        <InputContainer errorStyle={errors.email}>
                             <MdEmail
                                 size={32}
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
@@ -244,11 +251,11 @@ const CreateNewClient: React.FC = () => {
                             />
                             <input
                                 placeholder="email@email.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                id='email'
+                                {...register('email')}
                             />
                         </InputContainer>
-                        {errors.contact.email && <span className='formField__error'>{errors.contact.email}</span>}
+                        {errors.email && <span className='formField__error'>{errors.email.message}</span>}
                     </InputLabel>
 
                     {/* Description */}
@@ -262,19 +269,18 @@ const CreateNewClient: React.FC = () => {
                             />
                             <textarea
                                 placeholder='Adicionar nota ou observação sobre seu cliente'
-                                value={note}
-                                onChange={(e) => setNote(e.target.value)}
+                                id='note'
+                                {...register('note')}
                             >
 
                             </textarea>
                         </InputContainer>
-                        {errors.note && <span className='formField__error'>{errors.note}</span>}
+                        {errors.note && <span className='formField__error'>{errors.note.message}</span>}
                     </InputLabel>
 
                     <ButtonsContainer>
 
                         <ButtonSave
-                            onClick={cadastrarClient}
                         >Salvar</ButtonSave>
 
 

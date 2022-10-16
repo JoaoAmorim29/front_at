@@ -11,6 +11,7 @@
   "dependencies": {
     "@headlessui/react": "^1.5.0",
     "@heroicons/react": "^1.0.6",
+    "@hookform/resolvers": "^2.9.8",
     "axios": "^0.27.2",
     "cpf-cnpj-validator": "^1.0.3",
     "date-fns": "^2.28.0",
@@ -21,11 +22,13 @@
     "react": "17.0.2",
     "react-data-table-component": "^7.4.7",
     "react-dom": "17.0.2",
+    "react-hook-form": "^7.37.0",
     "react-icons": "^4.3.1",
     "react-input-mask": "^3.0.0-alpha.2",
     "react-notifications": "^1.7.4",
     "react-toastify": "^9.0.8",
-    "styled-components": "^5.3.3"
+    "styled-components": "^5.3.3",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.0",

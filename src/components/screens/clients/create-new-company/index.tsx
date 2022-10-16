@@ -38,7 +38,9 @@ import codInput from './codInput'
 import { cnpj, cpf } from 'cpf-cnpj-validator'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import validate from './validate';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useForm } from 'react-hook-form';
 
 const CreateNewCompany: React.FC = () => {
     const router = useRouter()
@@ -100,29 +102,11 @@ const CreateNewCompany: React.FC = () => {
 
     const auth = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NjE4MjM1MTAsImV4cCI6MTY2MTg0MTUxMH0.vwgtThvc85PlyK2zg8NCcSmTQGMFvWdBK0n7krNe1Ck';
 
-    /* Máscaras de CPF ou CPNJ */
+    /* Máscaras de CPF ou CNPJ */
     const masks = {
         cpf: '999.999.999-99',
-        cpnj: '99.999.999/9999-99'
+        cnpj: '99.999.999/9999-99'
     }
-
-    /* Valores errors */
-    const [errors, setErrors] = useState({
-        cod: '',
-        name: '',
-        segment: '',
-        obs: '',
-        address: {
-            cep: '',
-            uf: '',
-            city: '',
-            address: '',
-            district: '',
-            n: '',
-            cmpl: '',
-            str: ''
-        }
-    })
 
     const body = {
         cod: cod,
@@ -141,10 +125,23 @@ const CreateNewCompany: React.FC = () => {
         }
     }
     
-    const cadastrarCompany = (e) => {
-        e.preventDefault()
+    const cadastrarCompany = ({cnpj, name, codSegment, obs, cep, uf, city, address, district, n, cmpl, str}: any) => {
 
-        /* Validar campos */
+        setCod(cnpj)
+        setName(name)
+        setCodSegmento(codSegment)
+        setObservacao(obs)
+        setCep(cep)
+        setUf(uf)
+        setCidade(city)
+        setEndereco(address)
+        setBairro(district)
+        setNumero(n)
+        setComplemento(cmpl)
+        setRua(str)
+
+        console.log(body)
+
         
         Api.post('/api/company/add', body)
             .then(res => {
@@ -152,7 +149,7 @@ const CreateNewCompany: React.FC = () => {
                 router.push('/app/clients')
             })
             .catch(erro => {
-                setErrors(validate(body))
+                console.log(erro)
             })
     }
 
@@ -165,6 +162,31 @@ const CreateNewCompany: React.FC = () => {
                 setMunicipios(res.data)
             })
     }, [])
+
+    
+    const Schema = yup.object().shape({
+        name: yup.string().required('Nome é obrigatório.'),
+        cep: yup.string().required('CEP é obrigatório.').matches(/^\d{5}(\d{3})?$/, 'CEP inválido.'),
+        cnpj: yup.string().required('CNPJ é obrigatório.').min(1).matches(/^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/, 'CNPJ inválido.'),
+        codSegment: yup.number().min(1, 'Segmento é obrigatório.').required('Segmento é obrigatório.'),
+        obs: yup.string().required('Descrição é obrigatória.'),
+        uf: yup.string().required('Estado é obrigatório.'),
+        city: yup.string().required('Cidade é obrigatória.'),
+        address: yup.string().required('Endereço é obrigatório.'),
+        district: yup.string().required('Bairro é obrigatório.'),
+        n: yup.string().required('Número é obrigatório.'),
+        cmpl: yup.string().required('Complimento é obrigatório.'),
+        str: yup.string().required('Rua é obrigatória.')
+    })
+
+    const {register, handleSubmit, formState: {errors}} = useForm({
+        mode: 'onChange',
+        resolver: yupResolver(Schema),
+    });
+
+    const {onChange} = register('name');
+
+    console.log(errors)
 
     return (
         <Container>
@@ -181,13 +203,13 @@ const CreateNewCompany: React.FC = () => {
             </HeaderContainer>
 
             <Content>
-                <Form
+                <Form onSubmit={handleSubmit(cadastrarCompany)}
                 >
                     {/* Document */}
                     
                     <InputLabel>
                         <label>CNPJ/CPF</label>
-                        <InputContainer errorStyle={errors.cod}>
+                        <InputContainer errorStyle={errors.cnpj}>
                             <MdPerson
                                 size={32}
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
@@ -199,17 +221,18 @@ const CreateNewCompany: React.FC = () => {
                                 onChange={(e) => setCod(e.target.value)}
                                 ></CodInput> */}
 
-                            <InputMask
-                                mask= {masks.cpnj}
+                            <input
                                 type="text"
-                                placeholder='CNPJ/CPF'
-                                value={cod}
+                                placeholder='CNPJ/CPF (Ex: 99.999.999/9999-99)'
                                 max="14"
-                                onChange={(e) => setCod(e.target.value)}
+                                /*value={cod}
+                                onChange={(e) => setCod(e.target.value)}*/
+                                id='cnpj'
+                                {...register('cnpj')}
                             />
 
                         </InputContainer>
-                        {errors.cod && <span>{errors.cod}</span>}
+                        {errors.cnpj && <span>{errors.cnpj.message}</span>}
                     </InputLabel>
 
                     {/* Nome Empresa */}
@@ -223,23 +246,23 @@ const CreateNewCompany: React.FC = () => {
                             />
                             <input
                                 placeholder="Nome da Empresa"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                id='name'
+                                {...register('name')}
                             />
                         </InputContainer>
-                        {errors.name && <span className='formField__error'>{errors.name}</span>}
+                        {errors.name && <span className='formField__error'>{errors.name.message}</span>}
                     </InputLabel>
 
                     {/* Seguimento */}
                     <InputLabel>
                         <label>Seguimento da Empresa</label>
-                        <InputContainer errorStyle={errors.segment}>
+                        <InputContainer errorStyle={errors.codSegment}>
                             <MdOutlineWork
                                 size={32}
                                 style={{ marginLeft: '-3rem', marginRight: '1rem' }}
                                 color='#A7A7A7'
                             />
-                            <select value={codSegmento} onChange={(e) => setCodSegmento(e.target.value)}>
+                            <select  id='codSegment' {...register('codSegment')}>
                                 <option value="0">Segmentos</option>
                                 {segmentos.map((seg, key) => {
                                     return (
@@ -248,7 +271,7 @@ const CreateNewCompany: React.FC = () => {
                                 })}
                             </select>
                         </InputContainer>
-                        {errors.segment && <span className='formField__error'>{errors.segment}</span>}
+                        {errors.codSegment && <span className='formField__error'>{errors.codSegment.message}</span>}
                     </InputLabel>
 
                     {/* Endereço */}
@@ -269,13 +292,15 @@ const CreateNewCompany: React.FC = () => {
                             {/* Vai carregar os dados do endereço via API */}
                             <div className="inputContainerDiv">
                                 <InputAdress
-                                    errorStyle={errors.address.cep}
+                                    errorStyle={errors.cep}
                                     type="text"
                                     placeholder="Informe o CEP"
                                     maxLength = "8"
-                                    onChange={addressApi}
+                                    //onChange={addressApi}
+                                    id='cep'
+                                    {...register('cep', {onChange: addressApi})}
                                 />
-                            
+                                {errors.cep && <span className='formField__error'>{errors.cep.message}</span>}
                                 <BiLoader
                                     size={15}
                                     style={{
@@ -286,14 +311,13 @@ const CreateNewCompany: React.FC = () => {
                                     }}
                                     color='#A7A7A7'
                                 />
-                                {errors.address.cep && <span className='formField__error'>{errors.address.cep}</span>}
                             </div>
 
                             <Spacing />
 
                             {/* Estado */}
                             <div className="inputContainerDiv">
-                                <SelectAdress errorStyle={errors.address.uf} value={uf} onChange={(e) => setUf(e.target.value)}>
+                                <SelectAdress errorStyle={errors.uf} id='uf' {...register('uf')}>
                                     <option value="">Estado</option>
                                     {
                                         estado.map((s, key) => {
@@ -303,7 +327,7 @@ const CreateNewCompany: React.FC = () => {
                                         })
                                     }
                                 </SelectAdress>
-                                {errors.address.uf && <span className='formField__error'>{errors.address.uf}</span>}
+                                {errors.uf && <span className='formField__error'>{errors.uf.message}</span>}
                             </div>
 
                             <Spacing />
@@ -311,13 +335,13 @@ const CreateNewCompany: React.FC = () => {
                             {/* cidade */}
                             <div className="inputContainerDiv">
                                 <InputAdress
-                                    errorStyle={errors.address.city}
+                                    errorStyle={errors.city}
                                     type="text"
                                     placeholder="Cidade"
-                                    value={cidade}
-                                    onChange={(e) => setCidade(e.target.value)}
+                                    id='city'
+                                    {...register('city')}
                                 />
-                                {errors.address.city && <span className='formField__error'>{errors.address.city}</span>}
+                                {errors.city && <span className='formField__error'>{errors.city.message}</span>}
                             </div>
                         </InputContainer>
 
@@ -327,40 +351,39 @@ const CreateNewCompany: React.FC = () => {
                             {/* Endereço */}
                             <div className="inputContainerDiv">
                             <InputAdress
-                                errorStyle={errors.address.address}
+                                errorStyle={errors.address}
                                 type="text"
                                 placeholder="Endereço"
-                                value={endereco}
-                                onChange={(e) => setEndereco(e.target.value)}
+                                id='address'
+                                {...register('address')}
                             />
-                            {errors.address.address && <span className='formField__error'>{errors.address.address}</span>}
+                            {errors.address && <span className='formField__error'>{errors.address.message}</span>}
                             </div>
                            
                             <Spacing />
 
                             <div className="inputContainerDiv">
                                 <InputAdress
-                                    errorStyle={errors.address.district}
+                                    errorStyle={errors.district}
                                     type="text"
                                     placeholder='Bairro'
-                                    value={bairro}
-                                    onChange={(e) => setBairro(e.target.value)}
+                                    id='district'
+                                    {...register('district')}
                                 />
-                                {errors.address.district && <span className='formField__error'>{errors.address.district}</span>}
+                                {errors.district && <span className='formField__error'>{errors.district.message}</span>}
                             </div>
                             
                             <Spacing />
 
                             <div className="inputContainerDiv">
                                 <InputAdress
-                                    errorStyle={errors.address.n}
+                                    errorStyle={errors.n}
                                     type="text"
                                     placeholder="Número"
-                                    value={numero}
-                                    onChange={(e) => setNumero(e.target.value)}
-
+                                    id='n'
+                                    {...register('n')}
                                 />
-                                {errors.address.n && <span className='formField__error'>{errors.address.n}</span>}
+                                {errors.n && <span className='formField__error'>{errors.n.message}</span>}
                             </div>
                         </InputContainer>
 
@@ -370,14 +393,14 @@ const CreateNewCompany: React.FC = () => {
                             {/* Complemento */}
                             <div className="inputContainerDiv">
                                 <InputAdress
-                                    errorStyle={errors.address.cmpl}
+                                    errorStyle={errors.cmpl}
                                     type="text"
                                     placeholder="Complemento"
                                     maxLength="100"
-                                    value={complemento}
-                                    onChange={(e) => setComplemento(e.target.value)}
+                                    id='cmpl'
+                                    {...register('cmpl')}
                                 />
-                                {errors.address.cmpl && <span className='formField__error'>{errors.address.cmpl}</span>}
+                                {errors.cmpl && <span className='formField__error'>{errors.cmpl.message}</span>}
                             </div>
 
                             <Spacing />
@@ -385,14 +408,14 @@ const CreateNewCompany: React.FC = () => {
                             {/* Rua */}
                             <div className="inputContainerDiv">
                                 <InputAdress
-                                    errorStyle={errors.address.str}
+                                    errorStyle={errors.str}
                                     type="text"
                                     placeholder="Rua"
                                     maxLength="100"
-                                    value={rua}
-                                    onChange={(e) => setRua(e.target.value)}
+                                    id='str'
+                                    {...register('str')}
                                 />
-                                {errors.address.str && <span className='formField__error'>{errors.address.str}</span>}
+                                {errors.str && <span className='formField__error'>{errors.str.message}</span>}
                             </div>
 
                         </InputContainer>
@@ -410,18 +433,18 @@ const CreateNewCompany: React.FC = () => {
                             />
                             <textarea
                                 placeholder='Adicionar nota ou observação sobre seu cliente'
-                                value={observacao}
-                                onChange={(e) => setObservacao(e.target.value)}
+                                id='obs'
+                                {...register('obs')}
                             >
 
                             </textarea>
                         </InputContainer>
-                        {errors.obs && <span className='formField__error'>{errors.obs}</span>}
+                        {errors.obs && <span className='formField__error'>{errors.obs.message}</span>}
                     </InputLabel>
 
                     <ButtonsContainer>
 
-                        <ButtonSave onClick={cadastrarCompany}>Salvar</ButtonSave>
+                        <ButtonSave type='submit'>Salvar</ButtonSave>
 
                         <ButtonClose
                         onClick={(e) => {
